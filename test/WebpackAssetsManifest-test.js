@@ -468,6 +468,71 @@ describe('WebpackAssetsManifest', function() {
           manifest.toString(),
         );
       });
+
+      it('should sort entrypoints', () => {
+        const assetsWithEntrypoints = {
+          'b.js': 'b.js',
+          'a.js': 'a.js',
+          entrypoints: {
+            b: {
+              assets: {
+                js: [ 'b.js' ],
+              },
+            },
+            a: {
+              assets: {
+                js: [ 'a.js' ],
+              },
+            },
+          },
+        };
+        const manifest = new WebpackAssetsManifest({
+          assets: assetsWithEntrypoints,
+          sortManifest: true,
+          entrypoints: true,
+          space: 0,
+        });
+
+        manifest.processAssetsByChunkName(assetsWithEntrypoints);
+
+        assert.equal(
+          manifest.toString(),
+          '{"a.js":"a.js","b.js":"b.js","entrypoints":{"a":{"assets":{"js":["a.js"]}},"b":{"assets":{"js":["b.js"]}}}}',
+        );
+      });
+
+      it('should sort entrypoints under a custom key', () => {
+        const assetsWithEntrypoints = {
+          'b.js': 'b.js',
+          'a.js': 'a.js',
+          myEntrypoints: {
+            b: {
+              assets: {
+                js: [ 'b.js' ],
+              },
+            },
+            a: {
+              assets: {
+                js: [ 'a.js' ],
+              },
+            },
+          },
+        };
+        const manifest = new WebpackAssetsManifest({
+          assets: assetsWithEntrypoints,
+          sortManifest: true,
+          entrypoints: true,
+          entrypointsKey: 'myEntrypoints',
+          space: 0,
+        });
+
+        manifest.processAssetsByChunkName(assetsWithEntrypoints);
+
+        assert.equal(
+          manifest.toString(),
+          '{"a.js":"a.js","b.js":"b.js","myEntrypoints":{"a":{"assets":{"js":["a.js"]}},"b":{"assets":{"js":["b.js"]}}}}',
+        );
+      });
     });
 
     describe('fileExtRegex', function() {

@@ -57,12 +57,20 @@ class WebpackAssetsManifest
     });
 
     this.hooks.transform.tap(PLUGIN_NAME, (assets, manifest) => {
-      const { sortManifest } = manifest.options;
+      const { sortManifest, entrypointsKey } = manifest.options;
 
-      return sortManifest ? getSortedObject(
-        assets,
-        typeof sortManifest === 'function' ? sortManifest.bind(manifest) : undefined,
-      ) : assets;
+      if (! sortManifest) {
+        return assets;
+      }
+
+      const sortFunction = typeof sortManifest === 'function' ? sortManifest.bind(manifest) : undefined;
+      const sortedAssets = getSortedObject(assets, sortFunction);
+
+      if (entrypointsKey && sortedAssets[ entrypointsKey ]) {
+        sortedAssets[ entrypointsKey ] = getSortedObject(assets[ entrypointsKey ], sortFunction);
+      }
+
+      return sortedAssets;
     });
 
     this.hooks.afterOptions.tap(PLUGIN_NAME, (options, manifest) => {
